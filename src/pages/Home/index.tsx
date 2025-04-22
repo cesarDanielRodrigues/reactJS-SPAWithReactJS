@@ -8,7 +8,7 @@ import {
   StartCountdownButton,
   TaskInput,
 } from "./styles"
-import { get, useForm } from "react-hook-form"
+import {useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -55,8 +55,8 @@ export function Home() {
             id="minutesAmount"
             placeholder="00"
             step={5}
-            // min={5}
-            // max={60}
+            min={5}
+            max={60}
             {...register("minutesAmount", { valueAsNumber: true })}
           />
 
