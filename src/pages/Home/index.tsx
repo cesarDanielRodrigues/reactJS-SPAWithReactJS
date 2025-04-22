@@ -17,12 +17,18 @@ const newCycleFormSchema = z.object({
   minutesAmount: z.number().min(5).max(60, "O valor informado não está entre 5 e 60 minutos"),
 })
 
+type NewCycleFormData = z.infer<typeof newCycleFormSchema>
+
 export function Home() {
-  const { handleSubmit, register, watch} = useForm({
+  const { handleSubmit, register, watch} = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormSchema),
+    defaultValues:{
+      task: '',
+      minutesAmount: 0
+      }
   })
 
-  function handleCreateNewCycle(data: any) {
+  function handleCreateNewCycle(data: NewCycleFormData) {
     console.log(data)
   }
   
