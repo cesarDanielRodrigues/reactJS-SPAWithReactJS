@@ -11,7 +11,8 @@ import {
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { differenceInSeconds } from "date-fns"
 
 const newCycleFormSchema = z.object({
   task: z.string().min(1, "Digite o nome do projeto"),
@@ -24,12 +25,25 @@ interface Cycles {
   id: string
   task: string
   minutesAmount: number
+  startDate: Date
 }
 
 export function Home() {
   const [cycles, setCycles] = useState<Cycles[]>([])
   const [activeCycleID, setActiveCycleID] = useState<string | null>(null)
   const [secondsAmountPassed, setSecondsAmountPassed] = useState(0)
+  
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleID)
+
+  useEffect(()=>{
+    if(activeCycle){
+      setInterval(()=>{
+        setSecondsAmountPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate)
+        )
+      }, 1000)
+    }
+  },[activeCycle])
 
   const { handleSubmit, register, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormSchema),
@@ -46,6 +60,7 @@ export function Home() {
       id: id,
       task: data.task,
       minutesAmount: data.minutesAmount,
+      startDate: new Date()
     }
 
     setCycles((state) => [...state, newCycle])
@@ -54,12 +69,12 @@ export function Home() {
     reset()
   }
 
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleID)
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - secondsAmountPassed : 0
 
-  const minutesAmount = Math.floor(totalSeconds / 60)
+  const minutesAmount = Math.floor(currentSeconds / 60)
+  console.log(minutesAmount)
   const secondsAmount = currentSeconds % 60
 
   const minutes = String(minutesAmount).padStart(2,"0")
