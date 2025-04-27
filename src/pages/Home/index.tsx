@@ -7,12 +7,14 @@ import {
   Separator,
   StartCountdownButton,
   TaskInput,
+  StopCountdownButton
 } from "./styles"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
 import { differenceInSeconds } from "date-fns"
+import { HandPalm } from "@phosphor-icons/react/dist/ssr"
 
 const newCycleFormSchema = z.object({
   task: z.string().min(1, "Digite o nome do projeto"),
@@ -26,28 +28,27 @@ interface Cycles {
   task: string
   minutesAmount: number
   startDate: Date
+  interruptedDate?: Date
 }
 
 export function Home() {
   const [cycles, setCycles] = useState<Cycles[]>([])
   const [activeCycleID, setActiveCycleID] = useState<string | null>(null)
   const [secondsAmountPassed, setSecondsAmountPassed] = useState(0)
-  
+
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleID)
 
-  useEffect(()=>{
+  useEffect(() => {
     let interval: number
-    if(activeCycle){
-      interval = setInterval(()=>{
-        setSecondsAmountPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate)
-        )
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setSecondsAmountPassed(differenceInSeconds(new Date(), activeCycle.startDate))
       }, 1000)
     }
-    return ()=>{
+    return () => {
       clearInterval(interval)
     }
-  },[activeCycle])
+  }, [activeCycle])
 
   const { handleSubmit, register, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormSchema),
@@ -64,17 +65,29 @@ export function Home() {
       id: id,
       task: data.task,
       minutesAmount: data.minutesAmount,
-      startDate: new Date()
+      startDate: new Date(),
     }
 
     setCycles((state) => [...state, newCycle])
     setActiveCycleID(id)
     setSecondsAmountPassed(0)
-    
+
     reset()
   }
 
- 
+  function handleInterrupted(){
+    setCycles(
+      cycles.map((cycle)=>{
+        if(cycle.id == activeCycleID){
+          return {...cycle, interruptedDate: new Date()}
+        }else{
+          return cycle
+        }
+      })
+    )
+    setActiveCycleID(null)
+  }
+
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - secondsAmountPassed : 0
 
@@ -82,15 +95,14 @@ export function Home() {
   console.log(minutesAmount)
   const secondsAmount = currentSeconds % 60
 
-  const minutes = String(minutesAmount).padStart(2,"0")
-  const seconds = String(secondsAmount).padStart(2,"0")
+  const minutes = String(minutesAmount).padStart(2, "0")
+  const seconds = String(secondsAmount).padStart(2, "0")
 
-  useEffect(()=>{
-    if(activeCycle){
+  useEffect(() => {
+    if (activeCycle) {
       document.title = `${minutes}:${seconds} - ${activeCycle.task}`
     }
-  },[minutes,seconds,activeCycle])
-
+  }, [minutes, seconds, activeCycle])
 
   const task = watch("task")
   const isSubmitDisabled = !task
@@ -105,6 +117,7 @@ export function Home() {
             id="task"
             placeholder="Dê um nome para o seu projeto"
             list="taskList"
+            disabled={!!activeCycle}
             {...register("task")}
           />
           <datalist id="taskList">
@@ -122,6 +135,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            disabled={!!activeCycle}
             {...register("minutesAmount", { valueAsNumber: true })}
           />
 
@@ -136,10 +150,17 @@ export function Home() {
           <span>{seconds[1]}</span>
         </CountdownContainer>
 
-        <StartCountdownButton type="submit" disabled={isSubmitDisabled}>
-          <Play />
-          Começar
-        </StartCountdownButton>
+        {activeCycle ? (
+          <StopCountdownButton type="button" onClick={handleInterrupted}>
+            <HandPalm />
+            Interromper
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton type="submit" disabled={isSubmitDisabled}>
+            <Play />
+            Começar
+          </StartCountdownButton>
+        )}
       </form>
     </HomeContainer>
   )
