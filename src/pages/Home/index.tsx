@@ -1,4 +1,4 @@
-import { Play } from "@phosphor-icons/react"
+
 import {
   CountdownContainer,
   FormContainer,
@@ -14,7 +14,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
 import { differenceInSeconds } from "date-fns"
-import { HandPalm } from "@phosphor-icons/react/dist/ssr"
+import { Play, HandPalm } from "@phosphor-icons/react"
 
 const newCycleFormSchema = z.object({
   task: z.string().min(1, "Digite o nome do projeto"),
@@ -75,7 +75,7 @@ export function Home() {
     reset()
   }
 
-  function handleInterrupted(){
+  function handleInterruptedCycle(){
     setCycles(
       cycles.map((cycle)=>{
         if(cycle.id == activeCycleID){
@@ -92,7 +92,6 @@ export function Home() {
   const currentSeconds = activeCycle ? totalSeconds - secondsAmountPassed : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60)
-  console.log(minutesAmount)
   const secondsAmount = currentSeconds % 60
 
   const minutes = String(minutesAmount).padStart(2, "0")
@@ -106,6 +105,8 @@ export function Home() {
 
   const task = watch("task")
   const isSubmitDisabled = !task
+
+ 
 
   return (
     <HomeContainer>
@@ -151,7 +152,7 @@ export function Home() {
         </CountdownContainer>
 
         {activeCycle ? (
-          <StopCountdownButton type="button" onClick={handleInterrupted}>
+          <StopCountdownButton type="button" onClick={handleInterruptedCycle}>
             <HandPalm />
             Interromper
           </StopCountdownButton>
