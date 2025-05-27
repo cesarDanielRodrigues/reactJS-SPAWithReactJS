@@ -1,12 +1,5 @@
 import {
-  CountdownContainer,
-  FormContainer,
-  HomeContainer,
-  MinutesAmountInput,
-  Separator,
-  StartCountdownButton,
-  TaskInput,
-  StopCountdownButton,
+  HomeContainer, StartCountdownButton, StopCountdownButton
 } from "./styles"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -14,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
 import { differenceInSeconds } from "date-fns"
 import { Play, HandPalm } from "@phosphor-icons/react"
+import { Countdown } from "./Components/Countdown"
+import { NewCycleForm } from "./Components/NewCycleForm"
 
 const newCycleFormSchema = z.object({
   task: z.string().min(1, "Digite o nome do projeto"),
@@ -126,45 +121,9 @@ export function Home() {
   return (
     <HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
-        <FormContainer>
-          <label htmlFor="task">Vou trabalhar em</label>
-          <TaskInput
-            type="text"
-            id="task"
-            placeholder="Dê um nome para o seu projeto"
-            list="taskList"
-            disabled={!!activeCycle}
-            {...register("task")}
-          />
-          <datalist id="taskList">
-            <option value="Projeto1" />
-            <option value="Projeto2" />
-            <option value="Projeto3" />
-            <option value="Projeto4" />
-          </datalist>
+        <NewCycleForm/>
 
-          <label htmlFor="minutesAmount">durante</label>
-          <MinutesAmountInput
-            type="number"
-            id="minutesAmount"
-            placeholder="00"
-            step={5}
-            min={5}
-            max={60}
-            disabled={!!activeCycle}
-            {...register("minutesAmount", { valueAsNumber: true })}
-          />
-
-          <span>minutes.</span>
-        </FormContainer>
-
-        <CountdownContainer>
-          <span>{minutes[0]}</span>
-          <span>{minutes[1]}</span>
-          <Separator>:</Separator>
-          <span>{seconds[0]}</span>
-          <span>{seconds[1]}</span>
-        </CountdownContainer>
+        <Countdown />
 
         {activeCycle ? (
           <StopCountdownButton type="button" onClick={handleInterruptedCycle}>
