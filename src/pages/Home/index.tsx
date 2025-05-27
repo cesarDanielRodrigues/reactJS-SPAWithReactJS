@@ -1,4 +1,3 @@
-
 import {
   CountdownContainer,
   FormContainer,
@@ -7,7 +6,7 @@ import {
   Separator,
   StartCountdownButton,
   TaskInput,
-  StopCountdownButton
+  StopCountdownButton,
 } from "./styles"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -29,6 +28,7 @@ interface Cycles {
   minutesAmount: number
   startDate: Date
   interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -37,18 +37,36 @@ export function Home() {
   const [secondsAmountPassed, setSecondsAmountPassed] = useState(0)
 
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleID)
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
 
   useEffect(() => {
     let interval: number
     if (activeCycle) {
       interval = setInterval(() => {
-        setSecondsAmountPassed(differenceInSeconds(new Date(), activeCycle.startDate))
+        const secondsDifference = differenceInSeconds(new Date(), activeCycle.startDate)
+
+        if (secondsDifference >= totalSeconds) {
+          setCycles((state) =>
+            state.map((cycle) => {
+              if (cycle.id === activeCycleID) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            })
+          )
+
+          setSecondsAmountPassed(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setSecondsAmountPassed(secondsDifference)
+        }
       }, 1000)
     }
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle])
+  }, [activeCycle, activeCycleID, totalSeconds])
 
   const { handleSubmit, register, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormSchema),
@@ -75,12 +93,12 @@ export function Home() {
     reset()
   }
 
-  function handleInterruptedCycle(){
-    setCycles(
-      cycles.map((cycle)=>{
-        if(cycle.id == activeCycleID){
-          return {...cycle, interruptedDate: new Date()}
-        }else{
+  function handleInterruptedCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id == activeCycleID) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
           return cycle
         }
       })
@@ -88,7 +106,6 @@ export function Home() {
     setActiveCycleID(null)
   }
 
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - secondsAmountPassed : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60)
@@ -105,8 +122,6 @@ export function Home() {
 
   const task = watch("task")
   const isSubmitDisabled = !task
-
- 
 
   return (
     <HomeContainer>
