@@ -1,37 +1,54 @@
-import { FormContainer, TaskInput, MinutesAmountInput } from "./styles";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { FormContainer, TaskInput, MinutesAmountInput } from "./styles"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-export function NewCycleForm(){
-    return(
-        <FormContainer>
-          <label htmlFor="task">Vou trabalhar em</label>
-          <TaskInput
-            type="text"
-            id="task"
-            placeholder="Dê um nome para o seu projeto"
-            list="taskList"
-            disabled={!!activeCycle}
-            {...register("task")}
-          />
-          <datalist id="taskList">
-            <option value="Projeto1" />
-            <option value="Projeto2" />
-            <option value="Projeto3" />
-            <option value="Projeto4" />
-          </datalist>
+const newCycleFormSchema = z.object({
+  task: z.string().min(1, "Digite o nome do projeto"),
+  minutesAmount: z.number().min(5).max(60, "O valor informado não está entre 5 e 60 minutos"),
+})
 
-          <label htmlFor="minutesAmount">durante</label>
-          <MinutesAmountInput
-            type="number"
-            id="minutesAmount"
-            placeholder="00"
-            step={5}
-            min={5}
-            max={60}
-            disabled={!!activeCycle}
-            {...register("minutesAmount", { valueAsNumber: true })}
-          />
+type NewCycleFormData = z.infer<typeof newCycleFormSchema>
 
-          <span>minutes.</span>
-        </FormContainer>
-    )
+export function NewCycleForm() {
+  const { handleSubmit, register, watch, reset } = useForm<NewCycleFormData>({
+    resolver: zodResolver(newCycleFormSchema),
+    defaultValues: {
+      task: "",
+      minutesAmount: 0,
+    },
+  })
+  return (
+    <FormContainer>
+      <label htmlFor="task">Vou trabalhar em</label>
+      <TaskInput
+        type="text"
+        id="task"
+        placeholder="Dê um nome para o seu projeto"
+        list="taskList"
+        disabled={!!activeCycle}
+        {...register("task")}
+      />
+      <datalist id="taskList">
+        <option value="Projeto1" />
+        <option value="Projeto2" />
+        <option value="Projeto3" />
+        <option value="Projeto4" />
+      </datalist>
+
+      <label htmlFor="minutesAmount">durante</label>
+      <MinutesAmountInput
+        type="number"
+        id="minutesAmount"
+        placeholder="00"
+        step={5}
+        min={5}
+        max={60}
+        disabled={!!activeCycle}
+        {...register("minutesAmount", { valueAsNumber: true })}
+      />
+
+      <span>minutes.</span>
+    </FormContainer>
+  )
 }
