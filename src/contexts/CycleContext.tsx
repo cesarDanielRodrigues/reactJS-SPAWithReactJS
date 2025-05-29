@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useState } from "react"
 
-interface NewCycleFormData {
+interface CreateCycleData {
   task: string
   minutesAmount: number
 }
@@ -21,7 +21,7 @@ interface CyclesContextType {
   secondsAmountPassed: number
   markCurrentCycleAsFinished: () => void
   setSecondsPassed: (seconds: number) => void
-  createNewCycle: (data: NewCycleFormData)=> void
+  createNewCycle: (data: CreateCycleData)=> void
   interruptedCycle: ()=>void
 
 }
@@ -55,7 +55,7 @@ export function CyclesContextProvider({ children }: CycleContextProvidersProps) 
     )
   }
 
-  function createNewCycle(data: NewCycleFormData) {
+  function createNewCycle(data: CreateCycleData) {
     const id = String(new Date().getTime())
 
     const newCycle: Cycle = {
@@ -84,7 +84,7 @@ export function CyclesContextProvider({ children }: CycleContextProvidersProps) 
     )
     setActiveCycleID(null)
   }
-  
+
   return (
     <CyclesContext.Provider
       value={{
