@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useReducer, useState } from "react"
-import { Cycle, cyclesReducer } from "../reducers/cycles/cycles"
+import { Cycle, cyclesReducer } from "../reducers/cycles/reducers"
 import {
   addNewCycleAction,
   interruptedCurrentCycleAction,
